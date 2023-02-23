@@ -21,12 +21,41 @@ router.get('/user-list',(req,res,next)=>{
  let sql='SELECT * FROM users';
  db.query(sql,function(err,data){
   if(err) throw err;
-  res.render('user-list');//{title:'',userData: data} kao argumenti
+  res.render('user-list',{userData: data});//{title:'',userData: data} kao argumenti
 
  });
 
 });
-document.getElementById("show").onclick=()=>{
-  window.location.href="http://localhost:3000/users/user-list";
-}
+
+router.get('/delete/:id',(req,res,next)=>{
+let id=req.params.id;
+  let sql='DELETE FROM users WHERE id=?';
+db.query(sql,[id],function(err,data){
+  if(err) throw err;
+console.log(data.affectedRows+" records deleted");
+});
+res.redirect('/users/user-list');
+});
+
+router.get('/edit/:id', (req,res,next)=>{
+  let id=req.params.id;
+  let sql='SELECT * FROM users WHERE id=?';
+  //let sql='SELECT * FROM users WHERE id=${id}';
+  db.query(sql,[id],(err,data)=>{
+    if(err) throw err;
+    res.render('users-form',{editData:data[0]});
+  });
+});
+
+router.post('/edit/:id', (req,res,next)=>{
+let updatedData=req.body;
+let id=req.params.id;
+let sql='UPDATE users SET ? WHERE id=?';
+db.query(sql,[updatedData,id],(err,data)=>{
+if(err) throw err;
+console.log(data.affectedRows+" record updated");
+});
+res.redirect('/users/user-list');
+});
+//
 module.exports = router;
